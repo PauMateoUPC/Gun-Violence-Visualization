@@ -34,3 +34,16 @@ Dataframes
 Tasks:
 - Agregar dataframe shooting/population per estat
 - Agregar dataframe shootings/populations
+
+
+
+
+TODO:
+- Agregar per counties i afegir count population (sum)
+- Agregar per states i afegir count population (sum)
+- Calcula
+
+
+Dubtes
+- Com calculem la correlation? -> scatterplot on cada estat és un punt
+- A la Q4, què vol dir the US? Per estat, en general, per county? -> feel free
