@@ -18,7 +18,9 @@ PREGUNTES EXTRA:
 - la pobresa té algun efecte en la quantitat de mass shootings?
 - en quin setting es produeixen els mass shootings? centres comercials, escoles, bars, esglésies...?
 - quines armes s'utilitzen?
-- distribució ferits i morts?
+- distribució ferits i morts per shooting?
+- quants morts i ferits hi ha a l'any?
+- 
 
 - relacionar renta per capita amb mass shootings.
 - estudiar variables demogràfiques (gènere, edat...) dels autors
