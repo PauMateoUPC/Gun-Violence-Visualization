@@ -16,16 +16,15 @@
 PREGUNTES EXTRA:
 - la distribució de mass shootings és constant al llarg de l'any?
 - la pobresa té algun efecte en la quantitat de mass shootings?
-- en quin setting es produeixen els mass shootings? centres comercials, escoles, bars, esglésies...?
-- quines armes s'utilitzen?
 - distribució ferits i morts per shooting?
 - quants morts i ferits hi ha a l'any?
-- 
-
 - relacionar renta per capita amb mass shootings.
 - estudiar variables demogràfiques (gènere, edat...) dels autors
 
 
+Preguntes que probablement NO fem:
+- en quin setting es produeixen els mass shootings? centres comercials, escoles, bars, esglésies...?
+- quines armes s'utilitzen?
 
 Dataframes
 - (#shootings, ratio, county, state, date)
@@ -38,12 +37,6 @@ Tasks:
 - Agregar dataframe shootings/populations
 
 
-
-
-TODO:
-- Agregar per counties i afegir count population (sum)
-- Agregar per states i afegir count population (sum)
-- Calcula
 
 
 Dubtes
