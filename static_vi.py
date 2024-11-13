@@ -2,35 +2,122 @@ import streamlit as st
 import altair as alt
 import pandas as pd
 
-data = pd.DataFrame({'Country': ['Germany', 'France', 'Italy', 'Spain', 'Poland', 'Romania', 'Netherlands', 'Belgium', 'Czech Republic', 'Greece'],
-        'Population (Millions)': [83.155, 67.657, 59.236, 47.399, 37.840, 19.202, 17.475, 11.555, 10.702, 10.679]})
 
 
+def chart_Q3():
+    # Converteix les dates a un format de data de pandas
 
-chart1 = alt.Chart(data).mark_bar().encode(   #mark_bar -> type of chart ; #encode -> how we want to encode our data
-    alt.X('Country:N'),  #nominal variable
-    alt.Y('Population (Millions):Q'),  #quantity data
-).properties(title = 'Population')
+    df_shootings = pd.read_csv("datasets/MassShootingsComplete_FIPS.csv")
+    df_school_incidents = pd.read_csv("datasets/SchoolIncidents_FIPS.csv")
+
+    df_shootings['Incident Date'] = pd.to_datetime(df_shootings['Incident Date'])
+    df_school_incidents['Incident Date'] = pd.to_datetime(df_school_incidents['Incident Date'])
+
+    # Extreu l'any de la data de l'incident per ambdós datasets
+    df_shootings['Year'] = df_shootings['Incident Date'].dt.year
+    df_school_incidents['Year'] = df_school_incidents['Incident Date'].dt.year
+
+    # Filtra només els anys 2022 i posteriors
+    df_shootings = df_shootings[df_shootings['Year'] >= 2022]
+    df_school_incidents = df_school_incidents[df_school_incidents['Year'] >= 2022]
+
+    # Calcula el total de tirotejos per estat i any
+    total_shootings_per_state_year = df_shootings.groupby(['State', 'Year']).size().reset_index(name='Total Shootings')
+
+    # Calcula el total d'incidents escolars per estat i any
+    total_school_incidents_per_state_year = df_school_incidents.groupby(['State', 'Year']).size().reset_index(name='Total School Incidents')
+
+    # Uneix els dos datasets per estat i any
+    merged_data = pd.merge(total_shootings_per_state_year, total_school_incidents_per_state_year, on=['State', 'Year'])
+
+    # Crea el scatterplot amb Altair
+    scatterplot = alt.Chart(merged_data).mark_circle(size=100).encode(
+        x=alt.X('Total Shootings:Q', title='Total Shootings'),
+        y=alt.Y('Total School Incidents:Q', title='Total School Incidents'),
+        color=alt.Color('Year:O', 
+                        title='Year', 
+                        scale=alt.Scale(
+                            domain=[2022, 2023],  # Anys que tens en les dades
+                            range=['#1f77b4', '#ff7f0e']  # Paleta de colors contrastada
+                        )
+        ),
+        tooltip=['State', 'Year', 'Total Shootings', 'Total School Incidents'],  # Afegeix informació de descripció
+    ).properties(
+        title='Comparison of Total Shootings and School Incidents by State (2022 onwards)'
+    )
+
+    return scatterplot
 
 
-data = pd.DataFrame({'Country': ['Germany', 'France', 'Italy', 'Spain', 'Poland', 'Romania', 'Netherlands', 'Belgium', 'Czech Republic', 'Greece'],
-        'Population (Millions)': [83.155, 67.657, 59.236, 47.399, 37.840, 19.202, 17.475, 11.555, 10.702, 10.679]})
+def chart_Q4():
+    df_shootings = pd.read_csv("datasets/MassShootingsComplete_FIPS.csv")
+    gov = {
+        'Year': [i for i in range(2014, 2025)],
+        'y1': [230]*11,
+        'y2': [220]*11,
+        'governement': ['Democratic']*3 + ['Republican']*5 + ['Democratic']*3
+    }
 
-chart2 = alt.Chart(data).mark_bar().encode(
-    alt.X('Country:N'),
-    alt.Y('Population (Millions):Q'),
-    alt.Color('Country')   # coding color by country (by dafault it assumes that country is a nominal variable) si posem 'Country:O' (ordinal)
-).properties(title = 'Population')
+    # Convert to a DataFrame
+    df = pd.DataFrame(gov)
+
+    # Create the Altair bar chart using 'y1' or 'y2' as the Total Shootings value
+    chart_gov = alt.Chart(df).mark_area().encode(
+        x=alt.X('Year:O', title='Year', axis=alt.Axis(labelAngle=0)),
+        y=alt.Y('y1:Q', title='Total Shootings', scale=alt.Scale(domain=(200, 710))),
+        y2='y2:Q',  # Specify the y2 encoding for the upper boundary of the area
+        color=alt.Color('governement', scale=alt.Scale(domain=['Democratic', 'Republican'], range=['#3182bd', '#d7301f']))
+    ).properties(
+        title='Total Shootings per Year in the USA',
+        width=500,
+        height=400
+    )
+
+
+    # Converteix la data a un format de data de pandas
+    df_shootings['Incident Date'] = pd.to_datetime(df_shootings['Incident Date'])
+
+    # Extreu l'any de la data de l'incident
+    df_shootings['Year'] = df_shootings['Incident Date'].dt.year
+
+    # Agrupa per any i compta el nombre de tirotejos
+    shootings_per_year = df_shootings.groupby('Year').size().reset_index(name='Total Shootings')
+
+    # Crea el gràfic de línia amb Altair
+    chart_ms = alt.Chart(shootings_per_year).mark_line(
+        color='black',
+        point=alt.OverlayMarkDef(filled=True, fill="black"),
+        strokeWidth=2.5).encode(
+        x=alt.X('Year:O', title='Year', axis=alt.Axis(labelAngle=0)),  # Usa ':O' per especificar que l'eix X és ordinal
+        y=alt.Y('Total Shootings:Q', title='Total Shootings').scale(domain=(200,710))
+    ).properties(
+        title='Total Shootings per Year in the USA',
+        width=500,
+        height=400
+    )
+
+
+    return chart_gov + chart_ms
+
+
+q3 = chart_Q3()
+
+q4 = chart_Q4()
+
+st.set_page_config(
+    page_title="Gun Violence in the USA",layout="wide"
+)
+
+
 
 col1, col2 = st.columns(2)
 
-st.title("Gun Violence in the USA")
-st.header("prova")
 
-with col1:
-    st.altair_chart(chart1, use_container_width=True)
 
-with col2:
-    st.altair_chart(chart2, use_container_width=True)
+
+col1.altair_chart(q3,use_container_width=True)
+
+col2.altair_chart(q4, use_container_width=True)
+
 
 
