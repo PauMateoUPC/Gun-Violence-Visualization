@@ -4,7 +4,7 @@ import pandas as pd
 
 
 
-def chart_Q3():
+def chart_Q3() -> alt.Chart:
     # Converteix les dates a un format de data de pandas
 
     df_shootings = pd.read_csv("datasets/MassShootingsComplete_FIPS.csv")
@@ -43,13 +43,15 @@ def chart_Q3():
         ),
         tooltip=['State', 'Year', 'Total Shootings', 'Total School Incidents'],  # Afegeix informació de descripció
     ).properties(
-        title='Comparison of Total Shootings and School Incidents by State (2022 onwards)'
+        title='Comparison of Total Shootings and School Incidents by State (2022 onwards)',
+        width=500,
+        height=400
     )
 
     return scatterplot
 
 
-def chart_Q4():
+def chart_Q4() -> alt.Chart:
     df_shootings = pd.read_csv("datasets/MassShootingsComplete_FIPS.csv")
     gov = {
         'Year': [i for i in range(2014, 2025)],
@@ -85,8 +87,8 @@ def chart_Q4():
 
     # Crea el gràfic de línia amb Altair
     chart_ms = alt.Chart(shootings_per_year).mark_line(
-        color='black',
-        point=alt.OverlayMarkDef(filled=True, fill="black"),
+        color='#525252',
+        point=alt.OverlayMarkDef(filled=True, fill="#525252"),
         strokeWidth=2.5).encode(
         x=alt.X('Year:O', title='Year', axis=alt.Axis(labelAngle=0)),  # Usa ':O' per especificar que l'eix X és ordinal
         y=alt.Y('Total Shootings:Q', title='Total Shootings').scale(domain=(200,710))
@@ -108,16 +110,21 @@ st.set_page_config(
     page_title="Gun Violence in the USA",layout="wide"
 )
 
-
+st.markdown("<h1 style='text-align: center; color: black;'>Gun Violence in the USA</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; color: black;'>"+
+            "bla bla bla"+
+            "</h2>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 
 
+col1.altair_chart(q3,use_container_width=True)
 
 col1.altair_chart(q3,use_container_width=True)
 
 col2.altair_chart(q4, use_container_width=True)
 
+col2.altair_chart(q4, use_container_width=True)
 
 
