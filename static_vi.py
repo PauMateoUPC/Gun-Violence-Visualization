@@ -106,12 +106,12 @@ def chart_Q3() -> alt.Chart:
     df_GunViolence['Ratio School Incidents'] = df_GunViolence['School Incidents'] *1000000/ df_GunViolence['Population']
 
 
-    scatter_plot = alt.Chart(df_GunViolence).mark_circle(size=100).encode(
+    scatter_plot = alt.Chart(df_GunViolence).mark_circle(size=100, color='gray').encode(
         y=alt.Y('Ratio Shootings:Q', title='Ratio of Shootings per Population'),
         x=alt.X('Ratio School Incidents:Q', title='Ratio of School Incidents per Population'),
         tooltip=['State', 'Shootings', 'School Incidents', 'Population'] 
     ).properties(
-        width=600,
+        width=500,
         height=global_height+115,
         title="Ratio of Shootings per Population by State"
     )
@@ -162,11 +162,13 @@ def chart_Q4() -> alt.HConcatChart:
     df_GunViolence = df_GunViolence.groupby('Year')["Shootings"].sum().reset_index()
     df_GunViolence = df_GunViolence[df_GunViolence['Year']<2024]
     df_GunViolence['Year'] = pd.to_datetime(df_GunViolence['Year'], format='%Y')
+    df_GunViolence['Shootings'] = df_GunViolence['Shootings'].apply(lambda x : x/12)
 
     RED = '#f5b7b1'
     BLUE = '#aed6f1' 
 
-    D = alt.Scale(domain=(1000,10000))
+    D = alt.Scale(domain=(3000/12,8500/12))
+    w = 450
 
     chart_ms = alt.Chart(df_GunViolence).mark_line(
         color='black',
@@ -180,7 +182,7 @@ def chart_Q4() -> alt.HConcatChart:
             "text": ['Total Shootings per Year in the USA'],
             "fontSize": 16,
         },
-        width=500,
+        width=w,
         height=global_height
     )
 
@@ -191,7 +193,7 @@ def chart_Q4() -> alt.HConcatChart:
 
     chart_gov = alt.Chart(gov).mark_area().encode(
         x=alt.X('Year:T', title='Year', axis=alt.Axis(labelAngle=0)),
-        y=alt.Y('y1:Q', title='Total Shootings', scale=alt.Scale(domain=(200, 720))),
+        y=alt.Y('y1:Q', title='Total Shootings', scale=D,axis=None),
         y2='y2:Q',
         color=alt.Color('governement', legend=alt.Legend(
             orient='top-left', 
@@ -241,27 +243,31 @@ def chart_Q4() -> alt.HConcatChart:
         x=alt.X('x1:T', title=None),  # No title for X axis here
         x2='x2:T',
         y=alt.Y('y1:Q', scale=D, axis=None),  # No Y axis for background
-        y2=alt.Y2('y2:Q')
+        y2=alt.Y2('y2:Q'),
+        tooltip=alt.value(None)
     )
 
     rep = alt.Chart(df_rep).mark_rect(color=RED, opacity=1).encode(
         x=alt.X('x1:T', title=None),
         x2='x2:T',
         y=alt.Y('y1:Q', scale=D, axis=None),
-        y2=alt.Y2('y2:Q')
+        y2=alt.Y2('y2:Q'),
+        tooltip=alt.value(None)
     )
 
     dem2 = alt.Chart(df_dem2).mark_rect(color=BLUE, opacity=1).encode(
         x=alt.X('x1:T', title=None),
         x2='x2:T',
         y=alt.Y('y1:Q', scale=D, axis=None),
-        y2=alt.Y2('y2:Q')
+        y2=alt.Y2('y2:Q'),
+        tooltip=alt.value(None)
     )
 
     # Manual gridlines
-    y_values = pd.DataFrame({'y': list(range(250, 701, 50))})
+    y_values = pd.DataFrame({'y': [y for y in range(250, 701, 50)]})
     lines = alt.Chart(y_values).mark_rule(color='gray', size=0.8, opacity=0.5).encode(
-        y=alt.Y('y:Q', scale=D, title=None, axis=None)
+        y=alt.Y('y:Q', scale=D, title=None, axis=None),
+        tooltip=alt.value(None)
     )
 
 
@@ -274,7 +280,7 @@ def chart_Q4() -> alt.HConcatChart:
         chart_ms,   # Main line chart
         chart_gov
     ).properties(
-        width=500,
+        width=w,
         height=global_height
     ).resolve_scale(
         y='independent'  # Enforce shared y-scale for all layers
@@ -291,10 +297,7 @@ def chart_Q4() -> alt.HConcatChart:
         y=alt.Y('Month Name:N', sort=months, title=None),  # Canviar a l'eix Y
         color=alt.Color('Total Shootings:Q',
                         scale=alt.Scale(scheme='lightorange'),legend=None),
-        tooltip=[
-            alt.Tooltip('Month Name:N', title='Month'),
-            alt.Tooltip('Total Shootings:Q', title='Average', format='.1f')
-        ]
+        tooltip=alt.value(None)
     ).properties(
         width=40,
         height=global_height,
@@ -310,7 +313,8 @@ def chart_Q4() -> alt.HConcatChart:
         color='black'
     ).encode(
         y=alt.Y('Month Name:N', sort=months),
-        text=alt.Text('Total Shootings:Q', format='.1f')
+        text=alt.Text('Total Shootings:Q', format='.1f'),
+        tooltip=alt.value(None)
     )
 
 
@@ -379,7 +383,7 @@ map_chart = alt.Chart(states).mark_geoshape().encode(
 
 
 col1.altair_chart(q1,use_container_width=True)
-col1.altair_chart(q3,use_container_width=False)
+col1.altair_chart(q3,use_container_width=True)
 col2.altair_chart(map_chart, use_container_width=True)
-col2.altair_chart(q4, use_container_width=False)
+col2.altair_chart(q4, use_container_width=True)
 
