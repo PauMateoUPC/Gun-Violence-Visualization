@@ -68,18 +68,25 @@ def chart_Q1(k:int) -> alt.Chart:
     k = 10
 
     top_k_states = df_GunViolence.nlargest(k, 'Ratio State')
+    RED = '#f5b7b1'
+    BLUE = '#aed6f1'
 
     chart_state = alt.Chart(top_k_states).mark_bar().encode(
         alt.X('Ratio State:Q'),
         alt.Y('State:N', sort='-x'),
         alt.Color('Republican Vote:O', 
-                scale=alt.Scale(domain=['Democrats won the last 4', 'Democrats won 3', 'Rep won 2, Dem won 2', 'Republicans won 3', 'Republicans won the last 4'],
-                                range=['#0000FF', '#ADD8E6', '#800080', '#FF6666', '#FF0000']),
-                title='Majoritary Vote (last 4 elections)',
-                legend = alt.Legend(orient='bottom-right')
+                scale=alt.Scale(domain=['Democrats won the last 4', 'Republicans won the last 4'], range=[BLUE, RED]),
+                title='Majoritary Vote last 4 elections',
+                legend = alt.Legend(orient='bottom-right',
+                                    strokeColor='gray',
+                                    legendX=130, legendY=-100,
+                                    fillColor='#EEEEEE',
+                                    padding=10,
+                                    cornerRadius=10,
+                                    titleAnchor='middle')
         )
     ).properties(title = f'Top {k} States by Mass shootings per inhabitant',
-                 height = 415,
+                 height = 420,
                  width = 500).configure_legend(
     orient='right',  # La llegenda a la dreta
     padding=10,      # Espai addicional
@@ -92,6 +99,7 @@ def chart_Q1(k:int) -> alt.Chart:
 
 
 def chart_Q3() -> alt.Chart:
+    # Agrupar per estat i comptar el nombre total de tirotejos per estat
     df_GunViolence = df_GunViolence_csv.fillna(0)
 
 
@@ -106,15 +114,32 @@ def chart_Q3() -> alt.Chart:
     df_GunViolence['Ratio School Incidents'] = df_GunViolence['School Incidents'] *1000000/ df_GunViolence['Population']
 
 
-    scatter_plot = alt.Chart(df_GunViolence).mark_circle(size=100, color='gray').encode(
+    scatter_plot = alt.Chart(df_GunViolence).mark_circle(size=100).encode(
+        y=alt.Y('Ratio Shootings:Q', title='Ratio of Shootings per Population'),
+        x=alt.X('Ratio School Incidents:Q', title='Ratio of School Incidents per Population'),
+            color=alt.condition(
+            alt.datum['Ratio Shootings'] > 80,  # Condició per al color
+            alt.value('grey'),  # Color si es compleix la condició (vermell)
+            alt.value('black')  # Color si no es compleix la condició (blau)
+        ),
+        tooltip=['State', 'Shootings', 'School Incidents', 'Population'] 
+    ).properties(
+        width=800,
+        height=515,
+        title="Ratio of Shootings per Population by State"
+    )
+
+    ##### scatter plot to compute the regression line without outliers
+    scatterplot_without_outliers = alt.Chart(df_GunViolence[df_GunViolence['Ratio Shootings'] < 80]).mark_circle(size=100).encode(
         y=alt.Y('Ratio Shootings:Q', title='Ratio of Shootings per Population'),
         x=alt.X('Ratio School Incidents:Q', title='Ratio of School Incidents per Population'),
         tooltip=['State', 'Shootings', 'School Incidents', 'Population'] 
     ).properties(
-        width=500,
-        height=global_height+115,
+        width=800,
+        height=515,
         title="Ratio of Shootings per Population by State"
     )
+
 
     df_GunViolence['Label'] = df_GunViolence.apply(
         lambda x: x['State'] if (x['Ratio Shootings'] >= 80 or x['Ratio School Incidents']>=100)  else '', axis=1
@@ -145,10 +170,16 @@ def chart_Q3() -> alt.Chart:
         text='State'
     )
 
-    # Combinar el gràfic de dispersió amb les etiquetes
-    final_plot = scatter_plot + text_labels_sc + text_labels_others
 
-    return final_plot
+    # Crear una línia de regressió
+    regression_line = scatterplot_without_outliers.transform_regression(
+        'Ratio School Incidents', 'Ratio Shootings'
+    ).mark_line(color='red')
+
+    # Combinar el diagrama de dispersió i la línia de regressió
+    final_chart = scatter_plot + text_labels_sc + text_labels_others + regression_line
+
+    return final_chart
 
 
 def chart_Q4() -> alt.HConcatChart:
@@ -271,6 +302,35 @@ def chart_Q4() -> alt.HConcatChart:
     )
 
 
+    line2 = pd.DataFrame({
+        'x': [2019,2019],  # Coordenada fixa per la línia vertical
+        'y': [294, 390],  # Rang de les coordenades en l'eix Y
+    })
+
+    line2['x'] = pd.to_datetime(line2['x'],  format='%Y')
+
+    # Crear el gràfic amb Altair
+    chart_line2 = alt.Chart(line2).mark_line(strokeWidth=1, color='black').encode(
+        x=alt.X('x:T', timeUnit='year'),  # Fixem la coordenada X
+        y=alt.Y('y:Q', axis=None,scale=D),
+        tooltip=alt.value(None)
+    )
+
+    text2 = pd.DataFrame({
+        'x': [2019],
+        'y': [280],
+        'text': ["GVA reaches 7000+ sources"]
+    })
+    text2['x'] = pd.to_datetime(text2['x'], format = "%Y")
+
+    chart_text2 = alt.Chart(text2).mark_text().encode(
+        text="text",
+        x = alt.X('x:T', timeUnit='year'),
+        y = alt.Y("y:Q", axis=None,scale=D)
+    )
+
+
+
     # Combine layers with shared y-scale
     chart_with_background = alt.layer(
         dem1,       # Background rectangles
@@ -278,10 +338,12 @@ def chart_Q4() -> alt.HConcatChart:
         rep,
         lines,     # Gridlines
         chart_ms,   # Main line chart
-        chart_gov
+        chart_gov,
+        chart_text2,
+        chart_line2
     ).properties(
         width=w,
-        height=global_height
+        height=400
     ).resolve_scale(
         y='independent'  # Enforce shared y-scale for all layers
     )
