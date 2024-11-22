@@ -11,7 +11,6 @@ import numpy as np
 # read csv files
 MassShootings = pd.read_csv("datasets/MassShootingsComplete_FIPS.csv")
 df_shootings = MassShootings
-ShoolIncidents = pd.read_csv("datasets/SchoolIncidents_FIPS.csv")
 df_GunViolence_csv = pd.read_csv("datasets/GunViolenceCompleteData.csv")
 
 #define 
@@ -23,34 +22,17 @@ def chart_Q1(k:int) -> alt.Chart:
     df_GunViolence = pd.read_csv("datasets/GunViolenceCompleteData.csv")
 
 
-    df_GunViolence = (
-        df_GunViolence.groupby(['FIPS', 'County', 'State', 'Year'])
-        .agg({
-            'Population': 'first',  # Tomar el primer valor disponible de Population
-            'Shootings': 'sum'      # Sumar los valores de Shootings
-        })
-        .reset_index()
-    )
+    df_GunViolence = df_GunViolence_csv
+
     # agrupar per state
-    df_GunViolence = df_GunViolence.groupby(['State', 'Year'])[['Shootings', 'Population']].sum().reset_index()
+    df_GunViolence = df_GunViolence.groupby(['State', 'Year', 'Population'])[['Shootings']].sum().reset_index()
     df_GunViolence['Ratio State'] = df_GunViolence['Shootings'] / df_GunViolence['Population'] * 1000000 # ratio entre shootings i population
 
     # mean ratio for years
     df_GunViolence = df_GunViolence.groupby('State')['Ratio State'].mean().reset_index()
 
-
-    elections_republican = {'Alabama': 4, 'Alaska': 4, 'Arizona': 3, 'Arkansas': 4, 'California': 0, 'Colorado': 0, 'Connecticut': 0, 'Delaware': 0, 'District of Columbia': 0, 'Florida': 3, 'Georgia': 3, 'Hawaii': 0, 'Idaho': 4, 'Illinois': 0, 'Indiana': 4, 'Iowa': 3, 'Kansas': 4, 'Kentucky': 4, 'Louisiana': 4, 'Maine': 0, 'Maryland': 0, 'Massachusetts': 0, 'Michigan': 2, 'Minnesota': 0, 'Mississippi': 4, 'Missouri': 4, 'Montana': 4, 'Nebraska': 4, 'Nevada': 1, 'New Hampshire': 0, 'New Jersey': 0, 'New Mexico': 0, 'New York': 0, 'North Carolina': 4, 'North Dakota': 4, 'Ohio': 3, 'Oklahoma': 4, 'Oregon': 0, 'Pennsylvania': 2, 'Rhode Island': 0, 'South Carolina': 4, 'South Dakota': 4, 'Tennessee': 4, 'Texas': 4, 'Utah': 4, 'Vermont': 0, 'Virginia': 0, 'Washington': 0, 'West Virginia': 4, 'Wisconsin': 2, 'Wyoming': 4}
-    mapping = {
-        4: 'Republicans won the last 4 elections',
-        3: 'Republicans won 3 of the last 4 elections',
-        2: 'Republicans won 2 and Democrats won 2 of the last 4 elections',
-        1: 'Democrats won 3 of the last 4 elections',
-        0: 'Democrats won the last 4 elections'
-    }
-
-    for state in elections_republican.keys():
-        elections_republican[state] = mapping[elections_republican[state]]
-
+    # mean ratio for years
+    df_GunViolence = df_GunViolence.groupby('State')['Ratio State'].mean().reset_index()
 
     elections_republican = {'Alabama': 4, 'Alaska': 4, 'Arizona': 3, 'Arkansas': 4, 'California': 0, 'Colorado': 0, 'Connecticut': 0, 'Delaware': 0, 'District of Columbia': 0, 'Florida': 3, 'Georgia': 3, 'Hawaii': 0, 'Idaho': 4, 'Illinois': 0, 'Indiana': 4, 'Iowa': 3, 'Kansas': 4, 'Kentucky': 4, 'Louisiana': 4, 'Maine': 0, 'Maryland': 0, 'Massachusetts': 0, 'Michigan': 2, 'Minnesota': 0, 'Mississippi': 4, 'Missouri': 4, 'Montana': 4, 'Nebraska': 4, 'Nevada': 1, 'New Hampshire': 0, 'New Jersey': 0, 'New Mexico': 0, 'New York': 0, 'North Carolina': 4, 'North Dakota': 4, 'Ohio': 3, 'Oklahoma': 4, 'Oregon': 0, 'Pennsylvania': 2, 'Rhode Island': 0, 'South Carolina': 4, 'South Dakota': 4, 'Tennessee': 4, 'Texas': 4, 'Utah': 4, 'Vermont': 0, 'Virginia': 0, 'Washington': 0, 'West Virginia': 4, 'Wisconsin': 2, 'Wyoming': 4}
 
@@ -73,14 +55,15 @@ def chart_Q1(k:int) -> alt.Chart:
 
     top_k_states = df_GunViolence.nlargest(k, 'Ratio State')
     RED = '#f5b7b1'
+    SEMIRED = '#fadbd8'
     BLUE = '#aed6f1'
 
     chart_state = alt.Chart(top_k_states).mark_bar().encode(
         alt.X('Ratio State:Q'),
         alt.Y('State:N', sort='-x'),
         alt.Color('Republican Vote:O', 
-                scale=alt.Scale(domain=['Democrats won the last 4', 'Republicans won the last 4'], range=[BLUE, RED]),
-                title='Majoritary Vote last 4 elections',
+                scale=alt.Scale(domain=['Democrats won the last 4', 'Republicans won 3', 'Republicans won the last 4'], range=[BLUE, SEMIRED, RED]),
+                title='Majoritary Vote (last 4 elections)',
                 legend = alt.Legend(orient='bottom-right',
                                     strokeColor='gray',
                                     legendX=130, legendY=-100,
@@ -89,7 +72,7 @@ def chart_Q1(k:int) -> alt.Chart:
                                     cornerRadius=10,
                                     titleAnchor='middle')
         )
-    ).properties(title = f'Top {k} States by Mass shootings per inhabitant',
+    ).properties(title = f'Top {k} States by Mass shootings per 1M Inhabitants',
                  height = 420,
                  width = 500).configure_legend(
     orient='right',  # La llegenda a la dreta
@@ -105,8 +88,7 @@ def chart_Q1(k:int) -> alt.Chart:
     return chart_state
 
 
-def chart_Q2() -> alt.Chart:
-    url = data.us_10m.url
+def get_county_data_Q2() -> pd.DataFrame:
     counties_geojson_url = data.us_10m.url
     gdf_counties = gpd.read_file(counties_geojson_url, layer='counties')
 
@@ -124,13 +106,8 @@ def chart_Q2() -> alt.Chart:
     # aggregate by year and state and county
     df_counties = df_counties.groupby(['FIPS', 'State', 'County', 'Year', 'Population'])[['Shootings']].sum().reset_index()
 
-
     df_counties['Ratio County'] = df_counties['Shootings'] / df_counties['Population'] * 1000000 # ratio entre shootings i population
-
-    # mean ratio for years
     df_counties = df_counties.groupby(['FIPS', 'County'])['Ratio County'].mean().reset_index()
-
-    print(len(df_counties.loc[df_counties['Ratio County'] != 0]))
 
 
     df_counties['FIPS'] = df_counties['FIPS'].astype(str)
@@ -138,10 +115,16 @@ def chart_Q2() -> alt.Chart:
     df_combined = pd.merge(
         df_counties, df_coords, how='left', left_on='FIPS', right_on='FIPS'
     )
+    df_combined['Log Ratio County'] = df_combined['Ratio County'].apply(lambda x: np.log(x + 1))
+
+    df_combined = df_combined[(df_combined['County'] != 'Portsmouth city') & (df_combined['County'] != 'Petersburg city') & (df_combined['County'] != 'Manassas city') & (df_combined['County'] != 'Manassas city')]
+
+    return df_combined[df_combined['Ratio County'] > 0]
 
 
-    df_combined = df_combined[df_combined['Ratio County'] > 0]
-    # Descargar el archivo TopoJSON
+def get_state_data_Q2() -> pd.DataFrame:
+    url = data.us_10m.url
+    
     with urllib.request.urlopen(url) as response:
         us_10m = json.load(response)
 
@@ -149,6 +132,7 @@ def chart_Q2() -> alt.Chart:
 
     df_GunViolence['State Code'] = df_GunViolence_csv['FIPS'].apply(lambda x: str(x)[:2])
 
+    # fips data was not well formatted, manually fix it
     df_GunViolence.loc[df_GunViolence['State'] == 'Alabama', 'State Code'] = '01'
     df_GunViolence.loc[df_GunViolence['State'] == 'Alaska', 'State Code'] = '02'
     df_GunViolence.loc[df_GunViolence['State'] == 'Arizona', 'State Code'] = '04'
@@ -158,34 +142,29 @@ def chart_Q2() -> alt.Chart:
 
 
     df_GunViolence = df_GunViolence.groupby(['State Code', 'State', 'Population', 'Year'])[['Shootings']].sum().reset_index()
-    df_GunViolence['Ratio State'] = df_GunViolence['Shootings'] / df_GunViolence['Population'] * 1000000 # ratio entre shootings i population
+    df_GunViolence['Ratio State'] = df_GunViolence['Shootings'] / df_GunViolence['Population'] * 1000000
     df_GunViolence = df_GunViolence.groupby(['State', 'State Code'])['Ratio State'].mean().reset_index()
-
-
-    with urllib.request.urlopen(url) as response:
-        us_10m = json.load(response)
-
-    df_GunViolence['State Code'] = df_GunViolence['State Code'].astype(int)
-
-
-    states = alt.topo_feature(data.us_10m.url, feature='states')
 
     df_GunViolence['State Code'] = df_GunViolence['State Code'].astype(int)
     df_GunViolence['Log Ratio State'] = df_GunViolence['Ratio State'].apply(lambda x: np.log(x + 1))
     df_GunViolence['Colors'] = df_GunViolence['Ratio State']
-    df_GunViolence.loc[df_GunViolence['State']=='District of Columbia', 'Colors'] = 0
+    df_GunViolence.loc[df_GunViolence['State'] == 'District of Columbia', 'Colors'] = 5
+    return df_GunViolence
 
-    # Carregar la geometria dels estats dels EUA (mitjançant l'URL de topojson)
+
+def chart_Q2() -> alt.Chart:
+    
+    df_combined = get_county_data_Q2()
+    df_GunViolence = get_state_data_Q2()
     states = alt.topo_feature(data.us_10m.url, feature='states')
 
-    # Crear el coroplèstic map amb Altair
     map_chart = alt.Chart(states).mark_geoshape().encode(
         color=alt.Color('Colors:Q', scale=alt.Scale(scheme='oranges'), title='Ratio State'),
         tooltip=[
-                alt.Tooltip('State:N', title='Name'),  # Mostrar "County" como "Name"
-                alt.Tooltip('Ratio State:Q', title='Ratio State')  # Mostrar el valor original del Ratio
+                alt.Tooltip('State:N', title='Name'),
+                alt.Tooltip('Colors:Q', title='Ratio State')
         ]).transform_lookup(
-        lookup='id',  # Identificador dels estats
+        lookup='id',
         from_=alt.LookupData(df_GunViolence, 'State Code', ['Colors', 'State'])  # Unir per estat
     ).project(
         type='albersUsa'
@@ -194,16 +173,14 @@ def chart_Q2() -> alt.Chart:
         title="Ratio per State in the USA"
     )
 
-    df_combined['Log Ratio County'] = df_combined['Ratio County'].apply(lambda x: np.log(x + 1))
-
     points_chart = alt.Chart(df_combined).mark_circle().encode(
         longitude='Longitude:Q',
         latitude='Latitude:Q',
         size=alt.Size('Ratio County:Q', scale=alt.Scale(range=[15, 80]), title='Ratio County'),
         color = alt.condition(
-        alt.datum['State'] == 'District of Columbia',  # Condición
-        alt.value('red'),  # Valor cuando la condición es verdadera
-        alt.value('black')  # Valor cuando la condición es falsa
+        alt.datum['State'] == 'District of Columbia',
+        alt.value('red'),
+        alt.value('black')
     ),
         tooltip=[
             alt.Tooltip('County:N', title='County'),
@@ -211,15 +188,14 @@ def chart_Q2() -> alt.Chart:
         ]
     )
 
-
     final_chart = alt.layer(
-        map_chart,  # El mapa con colores para los estados
-        points_chart  # Los puntos de condados con colores para los shootings
+        map_chart,
+        points_chart
     ).resolve_scale(
-        color='independent'  # Esto asegura que las escalas de color sean independientes
+        color='independent'
     ).properties(
     width=800, height=global_height,
-    title="Total Shootings per State"
+    title="Shootings per 1M Inhabitants per State and County"
     ).configure_title(
             fontSize=16,
             anchor='middle'
@@ -232,12 +208,11 @@ def chart_Q3() -> alt.Chart:
     # Agrupar per estat i comptar el nombre total de tirotejos per estat
     df_GunViolence = df_GunViolence_csv.fillna(0)
 
-
-    df_GunViolence = df_GunViolence[df_GunViolence['Year']==2023]
+    df_GunViolence = df_GunViolence[df_GunViolence['Year'] == 2023]
     df_GunViolence = df_GunViolence.groupby(['State'])[['Shootings', 'School Incidents', 'Population']].agg({
         'Shootings': 'sum',
         'School Incidents': 'sum',
-        'Population': 'first'
+        'Population': 'sum'
     }).reset_index()
 
     df_GunViolence['Ratio Shootings'] = df_GunViolence['Shootings']*1000000 / df_GunViolence['Population']
@@ -245,24 +220,24 @@ def chart_Q3() -> alt.Chart:
 
 
     scatter_plot = alt.Chart(df_GunViolence).mark_circle(size=100).encode(
-        y=alt.Y('Ratio Shootings:Q', title='Ratio of Shootings per Population'),
-        x=alt.X('Ratio School Incidents:Q', title='Ratio of School Incidents per Population'),
+        y=alt.Y('Ratio Shootings:Q', title='Ratio of Shootings per 1M inhabitants'),
+        x=alt.X('Ratio School Incidents:Q', title='Ratio of School Incidents per 1M inhabitants'),
             color=alt.condition(
-            alt.datum['Ratio Shootings'] > 80,  # Condició per al color
-            alt.value('grey'),  # Color si es compleix la condició (vermell)
-            alt.value('black')  # Color si no es compleix la condició (blau)
+            alt.datum['Ratio Shootings'] > 3,  # Condició per al color
+            alt.value('grey'),  # Color si es compleix la condició
+            alt.value('black')  # Color si no es compleix la condició
         ),
         tooltip=['State', 'Shootings', 'School Incidents', 'Population'] 
     ).properties(
         width=800,
         height=515,
-        title="Ratio of Shootings per Population by State"
+        title="Shootings vs School Incidents per 1M inhabitants by State (2023)"
     )
 
     ##### scatter plot to compute the regression line without outliers
-    scatterplot_without_outliers = alt.Chart(df_GunViolence[df_GunViolence['Ratio Shootings'] < 80]).mark_circle(size=100).encode(
-        y=alt.Y('Ratio Shootings:Q', title='Ratio of Shootings per Population'),
-        x=alt.X('Ratio School Incidents:Q', title='Ratio of School Incidents per Population'),
+    scatterplot_without_outliers = alt.Chart(df_GunViolence[df_GunViolence['Ratio Shootings'] < 3]).mark_circle(size=100).encode(
+        y=alt.Y('Ratio Shootings:Q', title=''),
+        x=alt.X('Ratio School Incidents:Q', title=''),
         tooltip=['State', 'Shootings', 'School Incidents', 'Population'] 
     ).properties(
         width=800,
@@ -272,21 +247,9 @@ def chart_Q3() -> alt.Chart:
 
 
     df_GunViolence['Label'] = df_GunViolence.apply(
-        lambda x: x['State'] if (x['Ratio Shootings'] >= 80 or x['Ratio School Incidents']>=100)  else '', axis=1
+        lambda x: x['State'] if (x['Ratio Shootings'] >= 3 or x['Ratio School Incidents']>=100)  else '', axis=1
     )
-    # Afegir les etiquetes
-    # Ajustar les etiquetes individualment
-    # Etiquetes per a "South Carolina" a dalt a l'esquerra
-    text_labels_sc = alt.Chart(df_GunViolence[df_GunViolence['State'] == 'South Carolina']).mark_text(
-        align='center',  # Alineació a l'esquerra
-        dx=-20,  # Desplaçament cap a l'esquerra
-        dy=-15,  # Desplaçament cap amunt
-        size=14  # Mida del text augmentada
-    ).encode(
-        y=alt.Y('Ratio Shootings:Q'),
-        x=alt.X('Ratio School Incidents:Q'),
-        text='State'
-    )
+
 
     # Etiquetes per a la resta dels estats a baix a l'esquerra
     text_labels_others = alt.Chart(df_GunViolence[(df_GunViolence['Label'] != '') & (df_GunViolence['State'] != 'South Carolina')]).mark_text(
@@ -308,7 +271,6 @@ def chart_Q3() -> alt.Chart:
 
     # Combinar el diagrama de dispersió i la línia de regressió
     final_chart = alt.layer(scatter_plot,
-                            text_labels_sc,
                             text_labels_others,
                             regression_line).configure_title(
         fontSize=16,
@@ -322,19 +284,18 @@ def chart_Q4() -> alt.HConcatChart:
     MassShootings['Incident Date'] = pd.to_datetime(MassShootings['Incident Date'])
     MassShootings['Year'] = MassShootings['Incident Date'].dt.year
     MassShootings['Month'] = MassShootings['Incident Date'].dt.month
-    monthly_shootings = MassShootings[MassShootings['Year']>2014].groupby(['Year', 'Month']).size().reset_index(name='Total Shootings')
+    monthly_shootings = MassShootings[MassShootings['Year'] > 2014].groupby(['Year', 'Month']).size().reset_index(name='Total Shootings')
     monthly_avg = monthly_shootings.groupby('Month')['Total Shootings'].mean().reset_index()
+    
     df_GunViolence = pd.read_csv('datasets/GunViolenceCompleteData.csv')
-
     df_GunViolence = df_GunViolence.groupby('Year')["Shootings"].sum().reset_index()
-    df_GunViolence = df_GunViolence[df_GunViolence['Year']<2024]
+    df_GunViolence = df_GunViolence[df_GunViolence['Year'] < 2024]
     df_GunViolence['Year'] = pd.to_datetime(df_GunViolence['Year'], format='%Y')
-    df_GunViolence['Shootings'] = df_GunViolence['Shootings'].apply(lambda x : x/12)
 
     RED = '#f5b7b1'
     BLUE = '#aed6f1' 
 
-    D = alt.Scale(domain=(3000/12,8500/12))
+    D = alt.Scale(domain=(250,700))
     w = 450
 
     chart_ms = alt.Chart(df_GunViolence).mark_line(
@@ -353,16 +314,16 @@ def chart_Q4() -> alt.HConcatChart:
         height=global_height
     )
 
-        #we keep this just for the legend
+    #we keep this just for the legend
     gov = pd.DataFrame({
-        'governement':['Republican', 'Democratic']
+        'government':['Republican', 'Democratic']
     })
 
     chart_gov = alt.Chart(gov).mark_area().encode(
         x=alt.X('Year:T', title='Year', axis=alt.Axis(labelAngle=0)),
         y=alt.Y('y1:Q', title='Total Shootings', scale=D,axis=None),
         y2='y2:Q',
-        color=alt.Color('governement', legend=alt.Legend(
+        color=alt.Color('government', legend=alt.Legend(
             orient='top-left', 
             legendX=130, legendY=-100,  # Ajusta la posició de la llegenda
             strokeColor='gray',
@@ -379,7 +340,7 @@ def chart_Q4() -> alt.HConcatChart:
         'x2': 2017,
         'y1': [250]*2, 
         'y2': [700]*2,
-        'governement': ['Democratic']*2
+        'government': ['Democratic']*2
     })
     df_dem1['x1'] = pd.to_datetime(df_dem1['x1'], format ='%Y')
     df_dem1['x2'] = pd.to_datetime(df_dem1['x2'], format ='%Y')
@@ -390,7 +351,7 @@ def chart_Q4() -> alt.HConcatChart:
         'x2': 2021,
         'y1': [250]*2, 
         'y2': [700]*2,
-        'governement': ['Republican']*2
+        'government': ['Republican']*2
     })
     df_rep['x1'] = pd.to_datetime(df_rep['x1'], format ='%Y')
     df_rep['x2'] = pd.to_datetime(df_rep['x2'], format ='%Y')
@@ -400,7 +361,7 @@ def chart_Q4() -> alt.HConcatChart:
         'x2': 2023,
         'y1': [250]*2, 
         'y2': [700]*2,
-        'governement': ['Democratic']*2
+        'government': ['Democratic']*2
     })
     df_dem2['x1'] = pd.to_datetime(df_dem2['x1'], format ='%Y')
     df_dem2['x2'] = pd.to_datetime(df_dem2['x2'], format ='%Y')
@@ -498,7 +459,7 @@ def chart_Q4() -> alt.HConcatChart:
         width=40,
         height=global_height,
         title={
-            "text":['Average month','ditribution'],
+            "text":['Monthly average of','shootings ditribution'],
             "dy": 0,
             "fontSize": 16
             }
@@ -556,33 +517,6 @@ st.markdown("<p style='text-align: center; color: black;'>"+
             "</p>", unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 
-
-
-
-# Agrupar per estat i comptar el nombre de tirotejos per estat
-df_shootings['StateCode'] = df_shootings['FIPS'].apply(lambda x: str(x)[:2])
-df_shootings_grouped = df_shootings.groupby(['StateCode']).size().reset_index(name='Total Shootings')
-
-
-# Carregar la geometria dels estats dels EUA (mitjançant l'URL de topojson)
-states = alt.topo_feature(data.us_10m.url, feature='states')
-
-# Crear el coroplèstic map amb Altair
-map_chart = alt.Chart(states).mark_geoshape().encode(
-    color=alt.Color('Total Shootings:Q', scale=alt.Scale(scheme='reds'), title='Total Shootings'),
-    tooltip=['properties.name:N', 'Total Shootings:Q']  # Mostra el nom de l'estat i el nombre de tirotejos
-).transform_lookup(
-    lookup='id',  # Identificador dels estats
-    from_=alt.LookupData(df_shootings_grouped, 'StateCode', ['Total Shootings'])  # Unir per estat
-).project(
-    type='albersUsa'
-).properties(
-    width=800, height=global_height,
-    title="Total Shootings per State"
-).configure_title(
-        fontSize=16,
-        anchor='middle'
-)
 
 
 

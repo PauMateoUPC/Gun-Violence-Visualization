@@ -3188,11 +3188,11 @@
 3186,9000,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3187,9110,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3188,9120,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
-3189,9130,Connecticut,connecticut_county_unknown,2014,719139.4,1.0,0.0,1.390550983578427
+3189,9130,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3190,9140,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3191,9150,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3192,9160,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
-3193,9170,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
+3193,9170,Connecticut,connecticut_county_unknown,2014,719139.4,1.0,0.0,1.390550983578427
 3194,9180,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3195,9190,Connecticut,connecticut_county_unknown,2014,719139.4,0.0,0.0,0.0
 3196,1000,Alabama,Alabama,2015,4854803.0,0.0,0.0,0.0
@@ -6387,10 +6387,10 @@
 6385,9130,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
 6386,9140,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
 6387,9150,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
-6388,9160,Connecticut,connecticut_county_unknown,2015,717712.2,1.0,0.0,1.3933161509585599
+6388,9160,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
 6389,9170,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
 6390,9180,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
-6391,9190,Connecticut,connecticut_county_unknown,2015,717712.2,0.0,0.0,0.0
+6391,9190,Connecticut,connecticut_county_unknown,2015,717712.2,1.0,0.0,1.3933161509585599
 6392,1000,Alabama,Alabama,2016,4866824.0,0.0,0.0,0.0
 6393,1001,Alabama,Autauga County,2016,55302.0,0.0,0.0,0.0
 6394,1003,Alabama,Baldwin County,2016,207787.0,0.0,0.0,0.0
@@ -9578,15 +9578,15 @@
 9576,56043,Wyoming,Washakie County,2016,8180.0,0.0,0.0,0.0
 9577,56045,Wyoming,Weston County,2016,7228.0,0.0,0.0,0.0
 9578,9000,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
-9579,9110,Connecticut,connecticut_county_unknown,2016,715966.0,1.0,0.0,1.3967143691180866
+9579,9110,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
 9580,9120,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
-9581,9130,Connecticut,connecticut_county_unknown,2016,715966.0,1.0,0.0,1.3967143691180866
+9581,9130,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
 9582,9140,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
-9583,9150,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
+9583,9150,Connecticut,connecticut_county_unknown,2016,715966.0,1.0,0.0,1.3967143691180866
 9584,9160,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
 9585,9170,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
 9586,9180,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
-9587,9190,Connecticut,connecticut_county_unknown,2016,715966.0,0.0,0.0,0.0
+9587,9190,Connecticut,connecticut_county_unknown,2016,715966.0,1.0,0.0,1.3967143691180866
 9588,1000,Alabama,Alabama,2017,4877989.0,0.0,0.0,0.0
 9589,1001,Alabama,Autauga County,2017,55448.0,1.0,0.0,18.03491559659501
 9590,1003,Alabama,Baldwin County,2017,212737.0,0.0,0.0,0.0
@@ -19172,8 +19172,8 @@
 19170,9140,Connecticut,connecticut_county_unknown,2019,713204.4,0.0,0.0,0.0
 19171,9150,Connecticut,connecticut_county_unknown,2019,713204.4,0.0,0.0,0.0
 19172,9160,Connecticut,connecticut_county_unknown,2019,713204.4,0.0,0.0,0.0
-19173,9170,Connecticut,connecticut_county_unknown,2019,713204.4,0.0,0.0,0.0
-19174,9180,Connecticut,connecticut_county_unknown,2019,713204.4,1.0,0.0,1.4021225892605262
+19173,9170,Connecticut,connecticut_county_unknown,2019,713204.4,1.0,0.0,1.4021225892605262
+19174,9180,Connecticut,connecticut_county_unknown,2019,713204.4,0.0,0.0,0.0
 19175,9190,Connecticut,connecticut_county_unknown,2019,713204.4,0.0,0.0,0.0
 19176,1000,Alabama,Alabama,2020,5031864.0,0.0,0.0,0.0
 19177,1001,Alabama,Autauga County,2020,58915.0,0.0,0.0,0.0
@@ -22364,11 +22364,11 @@
 22362,9000,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22363,9110,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22364,9120,Connecticut,connecticut_county_unknown,2020,715517.2,1.0,0.0,1.3975904422702907
-22365,9130,Connecticut,connecticut_county_unknown,2020,715517.2,1.0,0.0,1.3975904422702907
+22365,9130,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22366,9140,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22367,9150,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22368,9160,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
-22369,9170,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
+22369,9170,Connecticut,connecticut_county_unknown,2020,715517.2,1.0,0.0,1.3975904422702907
 22370,9180,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22371,9190,Connecticut,connecticut_county_unknown,2020,715517.2,0.0,0.0,0.0
 22372,1000,Alabama,Alabama,2021,5050380.0,0.0,0.0,0.0
